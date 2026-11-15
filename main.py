@@ -1,5 +1,3 @@
-"""Rocket Game: Mission Architect, a Turkish/English Pygame project."""
-
 import math
 import random
 import sys
@@ -511,7 +509,7 @@ class MissionDesign:
 
 
 # ============================================================================
-# INTERACTIVE FLIGHT (60 saniye süre sınırı ile)
+# INTERACTIVE FLIGHT
 # ============================================================================
 class InteractiveFlightSession:
     def __init__(self, mission_state, telemetry):
@@ -535,7 +533,6 @@ class InteractiveFlightSession:
         self.scan_progress = 0.0
         self.status_banner = "FIRLATMA TAMAM — [W/A/S/D] UÇUŞ, [E] TARAMA"
         self.banner_timer = 200
-        # YENİ: 60 saniyelik süre sayacı
         self.flight_timer = 60.0
         rnd = random.Random(1958)
         self.stars = [(rnd.randint(20, self.world_w - 20), rnd.randint(20, self.world_h - 20), rnd.choice([1, 1, 2])) for _ in range(700)]
@@ -846,7 +843,6 @@ class NASASpaceAppsGame:
         self.shop_buttons.clear()
 
         if self.mode == "TUTORIAL":
-            # Tutorial'da da dil butonu olsun
             lang_text = "EN" if self.language == "TR" else "TR"
             self.buttons.append(Button((18, 10, 45, 32), lang_text, self.toggle_language, style="lang"))
             self.buttons.append(Button((SCREEN_W // 2 - 110, SCREEN_H - 118, 220, 40), self.T("next_step"), self.next_tutorial, style="primary"))
@@ -860,8 +856,6 @@ class NASASpaceAppsGame:
             return
 
         if self.mode == "FLIGHT":
-            # DEĞİŞİKLİK: Uçuş modunda dil butonu YOK (HUD ile çakışıyordu)
-            # Sadece "LOBİYE DÖN" butonu
             self.buttons.append(Button((SCREEN_W - 250, 13, 235, 36), self.T("return_lobby"), self.return_to_lobby_refund, style="primary"))
             return
 
@@ -874,7 +868,6 @@ class NASASpaceAppsGame:
             self.build_shop_entries()
             return
 
-        # DESIGN modu
         lang_text = "EN" if self.language == "TR" else "TR"
         self.buttons.append(Button((18, 10, 45, 32), lang_text, self.toggle_language, style="lang"))
         self.buttons.append(Button((SCREEN_W - 250, 10, 110, 32), self.T("shop"), self.open_shop, style="shop"))
@@ -1319,7 +1312,6 @@ class NASASpaceAppsGame:
         pygame.draw.polygon(self.screen, WHITE, pts)
         pygame.draw.polygon(self.screen, NASA_BLUE, pts, 2)
 
-        # DEĞİŞİKLİK: Sector map köşeye yaklaştırıldı (10px içeride)
         mm = pygame.Rect(SCREEN_W - 220, SCREEN_H - 130, 200, 100)
         pygame.draw.rect(self.screen, (5, 10, 20), mm)
         pygame.draw.rect(self.screen, BORDER_BLUE, mm, 1)
@@ -1335,21 +1327,17 @@ class NASASpaceAppsGame:
         pygame.draw.rect(self.screen, PANEL_BLACK, (0, 0, SCREEN_W, 62))
         pygame.draw.line(self.screen, BORDER_BLUE, (0, 62), (SCREEN_W, 62), 2)
         speed = int(math.hypot(fl.vx, fl.vy))
-        # YENİ: Kalan süre
         time_left = int(fl.flight_timer)
         total_score = fl.tele["design_sci"] + fl.flight_score_bonus
         
         l1 = f"{self.T('flight_controls')}   |   {self.T('speed')} {speed} m/s ({self.T('landing_limit')} 95)"
         self.screen.blit(self.font_sm.render(l1, True, WHITE), (16, 10))
         
-        # İkinci satır: delta-V, batarya, hedef, puan
         l2_base = f"{self.T('delta_v')} {int(fl.dv_remaining)} m/s   {self.T('battery')} %{int(fl.battery_pct)}   {self.T('target')} {len(fl.completed_tasks)}/3   {self.T('score')} {total_score}   "
         self.screen.blit(self.font_sm.render(l2_base, True, LIGHT_BLUE), (16, 34))
         
-        # YENİ: Süre sayacı - 10 saniye kala kırmızı yanıp sönen
         time_txt = f"{self.T('time')} {time_left}s"
         if time_left <= 10:
-            # Yanıp sönen efekt
             if (pygame.time.get_ticks() // 300) % 2 == 0:
                 time_col = ALERT_RED
             else:
